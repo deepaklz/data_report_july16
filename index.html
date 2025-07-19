@@ -1,0 +1,2301 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Foundry Monitoring Report Infographic</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <!-- Font Awesome for icons -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+      <style>
+         body {
+         font-family: 'Inter', sans-serif;
+         background-color: #f0f4f8; /* Light blue-gray background */
+         color: #334155; /* Dark slate gray text */
+         }
+         .container {
+         max-width: 1200px;
+         margin: 2rem auto;
+         padding: 1.5rem;
+         background-color: #ffffff;
+         border-radius: 1rem;
+         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+         }
+         .card {
+         background-color: #f8fafc; /* Lighter background for cards */
+         border-radius: 0.75rem;
+         padding: 1.5rem;
+         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+         transition: transform 0.2s ease-in-out;
+         border: 1px solid #e2e8f0; /* Light border */
+         }
+         .card:hover {
+         transform: translateY(-5px);
+         }
+         .section-title {
+         font-size: 1.5rem;
+         font-weight: 700;
+         color: #1e293b; /* Darker title color */
+         margin-bottom: 1rem;
+         border-bottom: 2px solid #cbd5e1; /* Subtle underline */
+         padding-bottom: 0.5rem;
+         }
+         .metric-value {
+         font-size: 2.25rem;
+         font-weight: 700;
+         color: #10b981; /* Green for positive */
+         }
+         .metric-label {
+         font-size: 0.9rem;
+         color: #64748b; /* Gray for labels */
+         }
+         .negative {
+         color: #ef4444; /* Red for negative */
+         }
+         .neutral {
+         color: #f59e0b; /* Amber for neutral */
+         }
+         /* Modified tooltip-content to display as a block element by default for specific sections */
+         /* This applies to New Customers Details and Software Turned Off Customers */
+         .new-customers-details-container .tooltip-content,
+         .software-turned-off-customers-container .tooltip-content {
+            display: block; /* Always visible */
+            position: static; /* Remove absolute positioning */
+            background-color: #f8fafc; /* Lighter background for these tables */
+            color: #334155; /* Dark slate gray text for readability */
+            padding: 0; /* Remove padding as it's a full table */
+            border-radius: 0; /* Remove border-radius */
+            font-size: 0.9rem; /* Adjust font size */
+            z-index: auto; /* Reset z-index */
+            box-shadow: none; /* Remove shadow */
+            pointer-events: auto; /* Allow interaction */
+            white-space: normal; /* Allow text wrapping */
+            transform: none; /* Remove translation */
+            left: auto;
+            top: auto;
+         }
+
+         /* Styles for actual hover tooltips on table headers */
+         .relative-hover .tooltip-content {
+            display: none; /* Hidden by default */
+            position: absolute; /* Absolute positioning for hover tooltips */
+            background-color: #f8fafc; /* Lighter background for hover tooltips */
+            color: #334155; /* Dark text for readability */
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            pointer-events: none; /* Do not allow interaction */
+            white-space: nowrap; /* Prevent text wrapping */
+            transform: translateX(-50%); /* Center horizontally */
+            left: 50%;
+            top: auto; /* Will be set by JS on mousemove */
+         }
+
+         .relative-hover:hover .tooltip-content {
+            display: block; /* Show on hover */
+         }
+
+         /* Table styling */
+         .data-table {
+         width: 100%;
+         border-collapse: collapse;
+         margin-top: 1rem;
+         font-size: 0.9rem;
+         }
+         .data-table th, .data-table td {
+         padding: 0.75rem 1rem;
+         text-align: left;
+         border-bottom: 1px solid #e2e8f0;
+         }
+         .data-table th {
+         background-color: #e2e8f0;
+         font-weight: 600;
+         color: #475569;
+         text-transform: uppercase;
+         font-size: 0.8rem;
+         }
+         .data-table tr:last-child td {
+         border-bottom: none;
+         }
+         .data-table tbody tr:hover {
+         background-color: #f0f4f8;
+         }
+         .scrollable-table-container {
+         max-height: 400px; /* Limit height for scrollable tables */
+         overflow-y: auto;
+         border: 1px solid #e2e8f0;
+         border-radius: 0.5rem;
+         }
+         .parsing-fail {
+         color: #dc2626; /* Red for parsing failures */
+         font-weight: 600;
+         }
+         /* Arrow icons */
+         .arrow-icon {
+         display: inline-block;
+         width: 1em;
+         height: 1em;
+         vertical-align: middle;
+         margin-left: 0.25em;
+         }
+         .arrow-up {
+         color: #10b981; /* Green */
+         }
+         .arrow-down {
+         color: #ef4444; /* Red */
+         }
+         .arrow-neutral {
+         color: #f59e0b; /* Amber */
+         }
+         /* Specific styling for the new adoption report cards */
+         .adoption-card {
+         border: 1px solid #e2e8f0;
+         border-radius: 0.75rem;
+         padding: 1.5rem;
+         background-color: #f8fafc;
+         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+         display: flex;
+         flex-direction: column;
+         gap: 0.75rem;
+         }
+         .adoption-card-header {
+         display: flex;
+         align-items: center;
+         gap: 0.75rem;
+         margin-bottom: 0.5rem;
+         }
+         .adoption-card-icon {
+         font-size: 1.5rem;
+         color: #ef4444; /* Red for warning/issue */
+         }
+         .adoption-card-title {
+         font-weight: 700;
+         color: #1e293b;
+         font-size: 1.125rem;
+         }
+         .adoption-score {
+         font-weight: 600;
+         color: #3b82f6; /* Blue for score */
+         }
+         .module-issue {
+         font-size: 0.875rem;
+         color: #475569;
+         }
+         .issue-summary, .recommended-actions {
+         font-size: 0.875rem;
+         color: #334155;
+         }
+         .issue-summary strong, .recommended-actions strong {
+         color: #1e293b;
+         }
+      </style>
+   </head>
+   <body>
+      <div class="container">
+         <!-- Report Header as Card -->
+         <div class="card text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Foundry Monitoring Report</h1>
+            <p class="text-gray-600">Period: 1st July to 16th July 2025</p>
+         </div>
+         <!-- 1. Customer Overview -->
+         <div class="mb-10">
+            <h2 class="section-title">1. Customer Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div class="card flex flex-col items-center justify-center p-6">
+                  <div class="metric-value" data-current="106" data-previous="101">106</div>
+                  <div class="metric-label">Paid Customers</div>
+                  <div class="tooltip-content">
+                     Previous Period: 101
+                  </div>
+               </div>
+               <div class="card flex flex-col items-center justify-center p-6">
+                  <div class="metric-value">
+                     3
+                     <svg class="arrow-icon arrow-up" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+                     </svg>
+                  </div>
+                  <div class="metric-label">New Customers</div>
+               </div>
+               <div class="card flex flex-col items-center justify-center p-6">
+                  <div class="metric-value negative">
+                     0
+                     <svg class="arrow-icon arrow-neutral" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M10 14a1 1 0 01-.707-.293l-4-4a1 1 0 011.414-1.414L10 12.586l3.293-3.293a1 1 0 011.414 1.414l-4 4A1 1 0 0110 14z" clip-rule="evenodd"></path>
+                     </svg>
+                  </div>
+                  <div class="metric-label">Dropped Customers</div>
+               </div>
+            </div>
+         </div>
+         <!-- 2. New Customers Details -->
+         <div class="mb-10">
+            <h2 class="section-title">2. New Customers Details</h2>
+            <div class="card p-6 new-customers-details-container">
+               <div class="tooltip-content">
+                  <div class="scrollable-table-container">
+                     <table class="data-table">
+                        <thead>
+                           <tr>
+                              <th>Customer Name</th>
+                              <th>Opt-in Feature</th>
+                              <th>Cluster</th>
+                              <th>Sub-Cluster</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>Indoshell Cast Ltd</td>
+                              <td>Only Reading + AI</td>
+                              <td>Tamil Nadu</td>
+                              <td>Chennai</td>
+                           </tr>
+                           <tr>
+                              <td>KALYAN STEEL PRODUCTS PRIVATE LIMITED - UNIT 2</td>
+                              <td>Suggestion Reading</td>
+                              <td>Uttar Pradesh</td>
+                              <td>Agra</td>
+                           </tr>
+                           <tr>
+                              <td>Rekha Metals Pvt. Ltd.</td>
+                              <td>Suggestion Reading</td>
+                              <td>Maharashtra</td>
+                              <td>Kolhapur</td>
+                           </tr>
+                           <tr>
+                              <td>Brahmani Technocast</td>
+                              <td>Suggestion Reading</td>
+                              <td>Gujarat</td>
+                              <td>Rajkot</td>
+                           </tr>
+                           <tr>
+                              <td>SHARP CHUCK UNIT - 3</td>
+                              <td>Suggestion Reading</td>
+                              <td>Punjab</td>
+                              <td>Jalandhar</td>
+                           </tr>
+                           <tr>
+                              <td>FERRO LINKS</td>
+                              <td>Suggestion Reading</td>
+                              <td>Tamil Nadu</td>
+                              <td>Chennai</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <!-- 3. Customer Grouping via Feature Attributes -->
+         <div class="mb-10">
+            <h2 class="section-title">3. Customer Grouping via Feature Attributes</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div class="card flex flex-col items-center">
+                  <h3 class="text-lg font-semibold text-gray-700 mb-4">Total Active Paid Customers by Group</h3>
+                  <div class="w-full max-w-xs h-64">
+                     <canvas id="customerGroupingChart"></canvas>
+                  </div>
+               </div>
+               <div class="card flex flex-col items-center">
+                  <h3 class="text-lg font-semibold text-gray-700 mb-4">Software ON Breakdown by Whatsapp Feature</h3>
+                  <div class="w-full max-w-xs h-64">
+                     <canvas id="whatsappFeatureChart"></canvas>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <!-- 4. ChargeMix Activity -->
+         <section class="mb-12 bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-teal-600 rounded-b-md flex items-center">
+               <i class="fas fa-chart-bar mr-2 text-teal-600"></i>
+               4. ChargeMix Activity
+            </h2>
+            <div class="overflow-x-auto mb-6">
+               <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                           Previous Period
+                           <div class="tooltip-content">No. ChargeMix Created/Modified (Previous Period)</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Period</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                           Optimized
+                           <div class="tooltip-content">Optimized ChargeMix Count</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                     </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Alchemy Precision Cast Pvt Ltd</td>
+                        <td class="px-6 py-4 whitespace-nowrap">18</td>
+                        <td class="px-6 py-4 whitespace-nowrap">37</td>
+                        <td class="px-6 py-4 whitespace-nowrap">36</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">CRESCENT FOUNDRY CO PVT.LTD.</td>
+                        <td class="px-6 py-4 whitespace-nowrap">16</td>
+                        <td class="px-6 py-4 whitespace-nowrap">13</td>
+                        <td class="px-6 py-4 whitespace-nowrap">13</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Brakes India Foundry Division Shollinganallur</td>
+                        <td class="px-6 py-4 whitespace-nowrap">5</td>
+                        <td class="px-6 py-4 whitespace-nowrap">7</td>
+                        <td class="px-6 py-4 whitespace-nowrap">7</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Brakes India Foundry Division Naidupet</td>
+                        <td class="px-6 py-4 whitespace-nowrap">7</td>
+                        <td class="px-6 py-4 whitespace-nowrap">2</td>
+                        <td class="px-6 py-4 whitespace-nowrap">2</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">Brakes India Pvt Ltd (Flometallic Unit, Jhagadia)</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">BRAKES INDIA PRIVATE LIMITED UNIT 2</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="w-full max-w-xl mx-auto h-80">
+               <canvas id="chargeMixActivityChart"></canvas>
+            </div>
+         </section>
+         <!-- 5. Software Turned Off Customers -->
+         <div class="mb-10">
+            <h2 class="section-title">5. Software Turned Off Customers</h2>
+            <div class="card p-6 software-turned-off-customers-container">
+               <div class="tooltip-content">
+                  <div class="scrollable-table-container">
+                     <table class="data-table">
+                        <thead>
+                           <tr>
+                              <th>Customer Name</th>
+                              <th>Remarks</th>
+                              <th>Opt-in Feature</th>
+                              <th>Cluster</th>
+                              <th>Sub-Cluster</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>Paranjape Auto Cast J-14(Cast Iron)</td>
+                              <td>Previous Period</td>
+                              <td>Compared Reading</td>
+                              <td>Maharashtra</td>
+                              <td>Satara</td>
+                           </tr>
+                           <tr>
+                              <td>CRESCENT FOUNDRY CO PVT.LTD.</td>
+                              <td>Previous Period</td>
+                              <td>Charge Mix</td>
+                              <td>West Bengal</td>
+                              <td>Howrah</td>
+                           </tr>
+                           <tr>
+                              <td>Airking Industries</td>
+                              <td>Previous Period</td>
+                              <td>Suggestion + HMT + MTC</td>
+                              <td>Gujarat</td>
+                              <td>Rajkot</td>
+                           </tr>
+                           <tr>
+                              <td>SAN PRECISION ALLOYS PRIVATE LIMITED</td>
+                              <td>Previous Period</td>
+                              <td>Compared Reading</td>
+                              <td>Tamil Nadu</td>
+                              <td>Coimbatore</td>
+                           </tr>
+                           <tr>
+                              <td>Top-Gear Metals Pvt Ltd</td>
+                              <td>Previous Period</td>
+                              <td>Suggestion</td>
+                              <td>Maharashtra</td>
+                              <td>Kolhapur</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <!-- 6. Module Use Status -->
+         <div class="mb-10">
+            <h2 class="section-title">6. Module Use Status</h2>
+            <div class="grid grid-cols-1 gap-6">
+               <!-- 6.1 Production Plan -->
+               <section class="mb-6 bg-white p-6 rounded-xl shadow-lg">
+                  <h3 class="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b-2 border-teal-600 rounded-b-md flex items-center">
+                     <i class="fas fa-clipboard-list mr-2 text-teal-600"></i>
+                     6.1 Production Plan
+                  </h3>
+                  <div class="overflow-x-auto mb-6">
+                     <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                           <tr>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                                 Previous Plans
+                                 <div class="tooltip-content">No. of Plans Created (Previous Period)</div>
+                              </th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Plans</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                           </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">CRESCENT FOUNDRY CO PVT.LTD.(GJ)</td>
+                              <td class="px-6 py-4 whitespace-nowrap">4</td>
+                              <td class="px-6 py-4 whitespace-nowrap">4</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">Sapre Precision Techologies</td>
+                              <td class="px-6 py-4 whitespace-nowrap">5</td>
+                              <td class="px-6 py-4 whitespace-nowrap">3</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Fair</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">Mal Metalliks Pvt. Ltd.</td>
+                              <td class="px-6 py-4 whitespace-nowrap">1</td>
+                              <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">Vishwakarma Founders Pvt Ltd</td>
+                              <td class="px-6 py-4 whitespace-nowrap">1</td>
+                              <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap neutral">NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)</td>
+                              <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                              <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap neutral">Shree Kedar metals</td>
+                              <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                              <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="w-full max-w-xl mx-auto h-80">
+                     <canvas id="productionPlanChart"></canvas>
+                  </div>
+               </section>
+               <!-- 6.2 Heat Plan -->
+               <section class="mb-6 bg-white p-6 rounded-xl shadow-lg">
+                  <h3 class="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b-2 border-teal-600 rounded-b-md flex items-center">
+                     <i class="fas fa-fire mr-2 text-teal-600"></i>
+                     6.2 Heat Plan
+                  </h3>
+                  <div class="overflow-x-auto mb-6">
+                     <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                           <tr>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                                 Heat Plan Created (Prev)
+                                 <div class="tooltip-content">Heat Plan Created (Previous Period)</div>
+                              </th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                                 Heat Plan Completed (Prev)
+                                 <div class="tooltip-content">Heat Plan Completed (Previous Period)</div>
+                              </th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Heat Plan Created (Curr)</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Heat Plan Completed (Curr)</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                                 Last Heat Plan Completed Date
+                                 <div class="tooltip-content">Last Heat Plan Completed Date</div>
+                              </th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                                 Avg Heat Plan Per Day
+                                 <div class="tooltip-content">Avg Heat Plan Per Day</div>
+                              </th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                                 Benchmark (Avg Heat Per Day)
+                                 <div class="tooltip-content">Benchmark (Avg Heat Per Day)</div>
+                              </th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                           </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="heat-plan-table-body">
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">CRESCENT FOUNDRY CO PVT.LTD.(GJ)</td>
+                              <td class="px-6 py-4 whitespace-nowrap">81</td>
+                              <td class="px-6 py-4 whitespace-nowrap">53</td>
+                              <td class="px-6 py-4 whitespace-nowrap">83</td>
+                              <td class="px-6 py-4 whitespace-nowrap">44</td>
+                              <td class="px-6 py-4 whitespace-nowrap">14-July-25</td>
+                              <td class="px-6 py-4 whitespace-nowrap">9.22</td>
+                              <td class="px-6 py-4 whitespace-nowrap">40</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Fair</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">Mal Metalliks Pvt. Ltd.</td>
+                              <td class="px-6 py-4 whitespace-nowrap">73</td>
+                              <td class="px-6 py-4 whitespace-nowrap">2</td>
+                              <td class="px-6 py-4 whitespace-nowrap">43</td>
+                              <td class="px-6 py-4 whitespace-nowrap">55</td>
+                              <td class="px-6 py-4 whitespace-nowrap">16-July-25</td>
+                              <td class="px-6 py-4 whitespace-nowrap">46.42</td>
+                              <td class="px-6 py-4 whitespace-nowrap">60</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)</td>
+                              <td class="px-6 py-4 whitespace-nowrap">187</td>
+                              <td class="px-6 py-4 whitespace-nowrap">58</td>
+                              <td class="px-6 py-4 whitespace-nowrap">38</td>
+                              <td class="px-6 py-4 whitespace-nowrap">18</td>
+                              <td class="px-6 py-4 whitespace-nowrap">1-July-25</td>
+                              <td class="px-6 py-4 whitespace-nowrap">19</td>
+                              <td class="px-6 py-4 whitespace-nowrap">15</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">Sapre Precision Techologies</td>
+                              <td class="px-6 py-4 whitespace-nowrap">71</td>
+                              <td class="px-6 py-4 whitespace-nowrap">16</td>
+                              <td class="px-6 py-4 whitespace-nowrap neutral">—</td>
+                              <td class="px-6 py-4 whitespace-nowrap">53</td>
+                              <td class="px-6 py-4 whitespace-nowrap">15-July-25</td>
+                              <td class="px-6 py-4 whitespace-nowrap">1.67</td>
+                              <td class="px-6 py-4 whitespace-nowrap">15</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">Shree Kedar metals</td>
+                              <td class="px-6 py-4 whitespace-nowrap">110</td>
+                              <td class="px-6 py-4 whitespace-nowrap">83</td>
+                              <td class="px-6 py-4 whitespace-nowrap">88</td>
+                              <td class="px-6 py-4 whitespace-nowrap">49</td>
+                              <td class="px-6 py-4 whitespace-nowrap">16-July-25</td>
+                              <td class="px-6 py-4 whitespace-nowrap">9.78</td>
+                              <td class="px-6 py-4 whitespace-nowrap">45</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Fair</td>
+                           </tr>
+                           <tr>
+                              <td class="px-6 py-4 whitespace-nowrap">Vishwakarma Founders Pvt Ltd</td>
+                              <td class="px-6 py-4 whitespace-nowrap">1128</td>
+                              <td class="px-6 py-4 whitespace-nowrap">296</td>
+                              <td class="px-6 py-4 whitespace-nowrap">973</td>
+                              <td class="px-6 py-4 whitespace-nowrap">330</td>
+                              <td class="px-6 py-4 whitespace-nowrap">16-July-25</td>
+                              <td class="px-6 py-4 whitespace-nowrap">69.5</td>
+                              <td class="px-6 py-4 whitespace-nowrap">60</td>
+                              <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  
+                  <div class="w-full max-w-xl mx-auto h-80">
+                     <canvas id="heatPlanChart"></canvas>
+                  </div>
+               </section>
+            </div>
+         </div>
+         <!-- 7. Melting Section EAF Heat Submission -->
+         <section class="mb-12 bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-teal-600 rounded-b-md flex items-center">
+               <i class="fas fa-fire-extinguisher mr-2 text-teal-600"></i>
+               7. Melting Section EAF Heat Submission
+            </h2>
+            <div class="overflow-x-auto mb-6">
+               <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                           Heat Submitted (Prev)
+                           <div class="tooltip-content">Heat Submitted Previous Period</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Heat Submitted (Current)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recoverable Loss</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                     </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">LOCO CASTINGS PRIVATE LIMITED</td>
+                        <td class="px-6 py-4 whitespace-nowrap">40</td>
+                        <td class="px-6 py-4 whitespace-nowrap">49</td>
+                        <td class="px-6 py-4 whitespace-nowrap">18254</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Fair</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Titagarh Rail Systems Limited (HED)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">132</td>
+                        <td class="px-6 py-4 whitespace-nowrap">150</td>
+                        <td class="px-6 py-4 whitespace-nowrap">118115</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">TITAGARH STEEL</td>
+                        <td class="px-6 py-4 whitespace-nowrap">120</td>
+                        <td class="px-6 py-4 whitespace-nowrap">109</td>
+                        <td class="px-6 py-4 whitespace-nowrap">84216</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="w-full max-w-xl mx-auto h-80">
+               <canvas id="eafHeatSubmissionChart"></canvas>
+            </div>
+         </section>
+         <!-- 8. HMT Section Report -->
+         <section class="mb-12 bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-teal-600 rounded-b-md flex items-center">
+               <i class="fas fa-flask mr-2 text-teal-600"></i>
+               8. HMT Section Report
+            </h2>
+            <div class="overflow-x-auto mb-6">
+               <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                           Previous Count
+                           <div class="tooltip-content">Previous Period Count</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Count</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                           Parsing Fail Count
+                           <div class="tooltip-content">Parsing Fail Count</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                           Parsing Fail %
+                           <div class="tooltip-content">Parsing Fail %</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                           Last Created Date
+                           <div class="tooltip-content">Last Created Date</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                           Remarks
+                           <div class="tooltip-content">Remarks</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                     </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Vishwakarma Founders Pvt Ltd</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Hardness</td>
+                        <td class="px-6 py-4 whitespace-nowrap">232</td>
+                        <td class="px-6 py-4 whitespace-nowrap">31</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">2-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Fair</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Vishwakarma Founders Pvt Ltd</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Microstructure</td>
+                        <td class="px-6 py-4 whitespace-nowrap">226</td>
+                        <td class="px-6 py-4 whitespace-nowrap">62</td>
+                        <td class="px-6 py-4 whitespace-nowrap">39</td>
+                        <td class="px-6 py-4 whitespace-nowrap parsing-fail">62.9</td>
+                        <td class="px-6 py-4 whitespace-nowrap">10-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap">According to the logic, only DOCX files should be parsed, PDF is not parsed.</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Vishwakarma Founders Pvt Ltd</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Tensile</td>
+                        <td class="px-6 py-4 whitespace-nowrap">21</td>
+                        <td class="px-6 py-4 whitespace-nowrap">8</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">10-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap">According to the logic, only DOCX files should be parsed, PDF is not parsed.</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Fair</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">MANTRI METALLICS PVT LTD</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Hardness</td>
+                        <td class="px-6 py-4 whitespace-nowrap">207</td>
+                        <td class="px-6 py-4 whitespace-nowrap">222</td>
+                        <td class="px-6 py-4 whitespace-nowrap">14</td>
+                        <td class="px-6 py-4 whitespace-nowrap parsing-fail">4.91</td>
+                        <td class="px-6 py-4 whitespace-nowrap">15-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap">The OCR service has been unavailable for some time.</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">MANTRI METALLICS PVT LTD</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Microstructure</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1111</td>
+                        <td class="px-6 py-4 whitespace-nowrap">886</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">15-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">MANTRI METALLICS PVT LTD</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Tensile</td>
+                        <td class="px-6 py-4 whitespace-nowrap">100</td>
+                        <td class="px-6 py-4 whitespace-nowrap">87</td>
+                        <td class="px-6 py-4 whitespace-nowrap">3</td>
+                        <td class="px-6 py-4 whitespace-nowrap parsing-fail">3.45</td>
+                        <td class="px-6 py-4 whitespace-nowrap">15-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap">The OCR service has been unavailable for some time.</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Mal Metalliks Pvt. Ltd.</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Hardness</td>
+                        <td class="px-6 py-4 whitespace-nowrap">42</td>
+                        <td class="px-6 py-4 whitespace-nowrap">17</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">4-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Fair</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Mal Metalliks Pvt. Ltd.</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Microstructure</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1062</td>
+                        <td class="px-6 py-4 whitespace-nowrap">724</td>
+                        <td class="px-6 py-4 whitespace-nowrap">11</td>
+                        <td class="px-6 py-4 whitespace-nowrap parsing-fail">1.36</td>
+                        <td class="px-6 py-4 whitespace-nowrap">15-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap">A blank file was generated.</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Mal Metalliks Pvt. Ltd.</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Tensile</td>
+                        <td class="px-6 py-4 whitespace-nowrap">31</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">12-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">CRESCENT FOUNDRY CO PVT.LTD.(GJ)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Hardness</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">4-June-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">CRESCENT FOUNDRY CO PVT.LTD.(GJ)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Microstructure</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">14-June-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">CRESCENT FOUNDRY CO PVT.LTD.(GJ)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Tensile</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">4-June-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Hardness</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">6-Feb-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Microstructure</td>
+                        <td class="px-6 py-4 whitespace-nowrap">384</td>
+                        <td class="px-6 py-4 whitespace-nowrap">339</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">14-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Tensile</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">23-Jun-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Unimech Industries Pvt Ltd</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Hardness</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">3</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">8-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Unimech Industries Pvt Ltd</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Tensile</td>
+                        <td class="px-6 py-4 whitespace-nowrap">57</td>
+                        <td class="px-6 py-4 whitespace-nowrap">103</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">15-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Mantri Metallics Pvt Ltd Pantnagar</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Hardness</td>
+                        <td class="px-6 py-4 whitespace-nowrap">28</td>
+                        <td class="px-6 py-4 whitespace-nowrap">89</td>
+                        <td class="px-6 py-4 whitespace-nowrap">12</td>
+                        <td class="px-6 py-4 whitespace-nowrap parsing-fail">12.5</td>
+                        <td class="px-6 py-4 whitespace-nowrap">15-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap">The OCR service has been unavailable for some time.</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Mantri Metallics Pvt Ltd Pantnagar</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Tensile</td>
+                        <td class="px-6 py-4 whitespace-nowrap">24</td>
+                        <td class="px-6 py-4 whitespace-nowrap">23</td>
+                        <td class="px-6 py-4 whitespace-nowrap">3</td>
+                        <td class="px-6 py-4 whitespace-nowrap parsing-fail">8.57</td>
+                        <td class="px-6 py-4 whitespace-nowrap">11-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap">The OCR service has been unavailable for some time.</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">KALYAN STEEL PRODUCTS PRIVATE LIMITED</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Hardness</td>
+                        <td class="px-6 py-4 whitespace-nowrap">2</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">24-June-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">KALYAN STEEL PRODUCTS PRIVATE LIMITED</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Microstructure</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">21-June-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Airking Industries</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Microstructure</td>
+                        <td class="px-6 py-4 whitespace-nowrap">68</td>
+                        <td class="px-6 py-4 whitespace-nowrap">12</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">6-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Fair</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Sapre Precision Techologies</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Microstructure</td>
+                        <td class="px-6 py-4 whitespace-nowrap">26</td>
+                        <td class="px-6 py-4 whitespace-nowrap">38</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">15-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">GOVIND STEEL</td>
+                        <td class="px-6 py-4 whitespace-nowrap">Microstructure</td>
+                        <td class="px-6 py-4 whitespace-nowrap">332</td>
+                        <td class="px-6 py-4 whitespace-nowrap">648</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">15-July-25</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="w-full max-w-xl mx-auto h-80">
+               <canvas id="hmtReportChart"></canvas>
+            </div>
+         </section>
+         <!-- 9. Casting Report - MTC -->
+         <section class="mb-12 bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-teal-600 rounded-b-md flex items-center">
+               <i class="fas fa-certificate mr-2 text-teal-600"></i>
+               9. Casting Report - MTC
+            </h2>
+            <div class="overflow-x-auto mb-6">
+               <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Certificates</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pending</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative-hover">
+                           Previous MTC Customers
+                           <div class="tooltip-content">Previous Period Material Testing Customers</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current MTC Customers</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                     </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200" id="casting-report-table-body">
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Vishwakarma Founders Pvt Ltd</td>
+                        <td class="px-6 py-4 whitespace-nowrap">11</td>
+                        <td class="px-6 py-4 whitespace-nowrap">6</td>
+                        <td class="px-6 py-4 whitespace-nowrap">5</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Fair</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Airking Industries</td>
+                        <td class="px-6 py-4 whitespace-nowrap">3</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">4</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1</td>
+                        <td class="px-6 py-4 whitespace-nowrap">3</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">Mal Metalliks Pvt. Ltd.</td>
+                        <td class="px-6 py-4 whitespace-nowrap">11</td>
+                        <td class="px-6 py-4 whitespace-nowrap">11</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">3</td>
+                        <td class="px-6 py-4 whitespace-nowrap">7</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-red-600 font-semibold">Poor</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">CRESCENT FOUNDRY CO PVT.LTD.(GJ)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">3</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1</td>
+                        <td class="px-6 py-4 whitespace-nowrap">2</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">3</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">GOVIND Steel</td>
+                        <td class="px-6 py-4 whitespace-nowrap">2</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1</td>
+                        <td class="px-6 py-4 whitespace-nowrap">1</td>
+                        <td class="px-6 py-4 whitespace-nowrap">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap">2</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-green-600 font-semibold">Good</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">Unimech Industries Pvt Ltd</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">KALYAN STEEL PRODUCTS PRIVATE LIMITED</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">Sapre Precision Techologies</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">Luthra</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">Shree Kedar metals</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap neutral">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-amber-600 font-semibold">Neutral</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="w-full max-w-xl mx-auto h-80">
+               <canvas id="castingReportChart"></canvas>
+            </div>
+         </section>
+         <!-- 10. 15 Days Working Hardware Status -->
+         <div class="mb-10">
+            <h2 class="section-title">10. 15 Days Working Hardware Status</h2>
+            <div class="card scrollable-table-container">
+               <table class="data-table">
+                  <thead>
+                     <tr>
+                        <th>Hardware Classification</th>
+                        <th>Customers Onboarded</th>
+                        <th>Devices Assigned</th>
+                        <th>Customers with Device On ≥ 1 Day</th>
+                        <th>Devices On ≥ 5 Days</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr>
+                        <td>Spectro TV</td>
+                        <td>47</td>
+                        <td>82</td>
+                        <td>40</td>
+                        <td>44</td>
+                     </tr>
+                     <tr>
+                        <td>Spectro-Tablet</td>
+                        <td>11</td>
+                        <td>11</td>
+                        <td>2</td>
+                        <td>1</td>
+                     </tr>
+                     <tr>
+                        <td>DigiMelt-IF</td>
+                        <td>6</td>
+                        <td>8</td>
+                        <td>5</td>
+                        <td>6</td>
+                     </tr>
+                     <tr>
+                        <td>DigiMelt-EAF</td>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>4</td>
+                        <td>3</td>
+                     </tr>
+                     <tr>
+                        <td>Heat Plan-Tablet</td>
+                        <td>1</td>
+                        <td>3</td>
+                        <td>1</td>
+                        <td>0</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <!-- Customer Adoption Issues Report (Card Format) -->
+         <section class="mb-12 bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-teal-600 rounded-b-md flex items-center">
+               <i class="fas fa-exclamation-triangle mr-2 text-teal-600"></i>
+               Customer Adoption Issues Report
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               <!-- Data for the cards -->
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Paranjape Auto Cast Satara Unit Pvt Ltd</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-red-600">0%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (94.74%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> High grade tagging failure (83%); numerous new grades causing tagging challenges; sample tagging at 89%.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Conduct training on grade tagging; review new grade list and update pop-up dropdowns; increase sample tagging accuracy.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">KALYAN STEEL PRODUCTS PRIVATE LIMITED</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">29%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): HMT (69.47%), MTC (28.07%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Tensile machine issue prevented HMT usage; new customer, no MTC usage yet.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Investigate and resolve tensile machine issues; onboard and train on MTC module; schedule follow-up adoption support.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Ramkrishna Foundry pvt ltd</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">34%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (81.48%), Suggestion (11.11%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> File structure change after 20 June causing 100% tagging failure; suggestions performed well before 20 June.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Audit file formats and tagging procedures; support customer with updated file guidelines; enable suggestion feature reactivation.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Sapre Precision Techologies</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">38%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): HMT (59.48%), MTC (36.05%), Suggestion (2.47%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Hardness and tensile test files not received; no MTC files created; grading issues causing suggestion generation failures.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Expedite data upload for missing tests; provide onboarding help for MTC module; assist with grade tagging accuracy and suggestion generation.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Crescent Foundry Pvt Ltd (Bagnan Unit)</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">45%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Display (100%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Display module turned off since 14 July 2025.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Engage customer on enabling display module; assess usage barriers; provide refresher support and hardware check if needed.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Crescent Foundry Pvt Ltd (Kulgachia Unit)</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">41%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Display (100%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Display module turned off since 28 March 2025.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Similar action as Bagnan Unit: activate display; raise awareness of benefits; technical support to resolve issues.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Shree Kedar</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">45%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): HMT (61.37%), MTC (24.80%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> No recent usage in HMT and MTC modules; last tensile sample created in January.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Perform engagement review; encourage regular test creation and module use; schedule refresher training on HMT/MTC modules.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Malnad Alloy Castings Pvt. Ltd.</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">47%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (28.42%), Display (65.07%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Low tagging (15%); display module turned off since March 2024.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Support improved tagging workflows; activate and troubleshoot display module; provide ongoing user training and incentives.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Rajneesh Cast Alloys</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">41%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Display (100%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Display module turned off since June 2025.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Follow-up to reactivate display; identify operational or technical causes; communicate benefits.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">50%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Production Plan (17.01%), Heat Plan (29.15%), HMT (32.07%), MTC (19.44%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> No new production plans; limited HMT/MTC usage; microstructure active; some heat plans ongoing.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Motivate active use of production & heat planning; address barriers to HMT and MTC adoption; schedule adoption review meetings.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Ratan Industries</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">51%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (14.88%), Suggestion (10.21%), Display (68.09%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Low grade tagging; 100% Add/Dil failure; display off since May 2025.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Review grade tagging quality; resolve Add/Dil failures and system forms; reactivate display module and increase user engagement.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Gangadhar Alloys Pvt. Ltd.</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-amber-600">53%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (26.25%), Display (55%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Grade tagging issue due to new grades; display device unused last 5 days.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Address new grade tagging challenges; re-engage users on display usage; provide refresher training and troubleshooting.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">GOVIND STEEL</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-green-600">61%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (3.13%), Suggestion (5.78%), MTC (88.87%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Low grade not tagging (11%); Mg recovery missing causing grade failure; starting MTC usage.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Facilitate grade tagging improvements; resolve additive data issues for suggestions; support continued MTC onboarding.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Iconic Castings Pvt Ltd</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-green-600">61%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (8.17%), Display (83.49%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Multiple new grades not tagged correctly; display module turned off since June 2025.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Help update grade dictionary; encourage display module activation; provide user support on common issues.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">JMT Auto Limited</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-green-600">61%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Display (84.16%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Display module turned off since July 2024.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Activate display module; offer technical and user training support; highlight module benefits.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">SHARP CHUCK UNIT - 3</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-green-600">60%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (78.46%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> New grades causing 50% grade tagging failure; missing in pop-up dropdown.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Update grade list and popup options; conduct targeted training on new grade tagging; monitor adoption improvements.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">KOHINOOR METALLICS</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-green-600">60%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (19.61%), Display (71.45%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Tagging errors due to wrong pattern; display turned off since June 2025.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Correct grade tagging processes; encourage display module usage; run training session for data input standards.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Glow Cast</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-green-600">60%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (10.57%), Display (81.30%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Tagging issues from notation errors ("-" instead of "/"); display off since June 2025.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Address tagging format issues; reactivate display module; provide user documentation and support.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Shanghvi Founders & Engineers Pvt. Ltd.</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-green-600">64%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Display (92.30%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> Display module turned off since March 2025.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Engage customer to enable display; address operational hurdles; ongoing technical assistance.</p>
+               </div>
+               <div class="adoption-card">
+                  <div class="adoption-card-header">
+                     <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                     <h3 class="adoption-card-title">Yash Metallics Pvt Ltd</h3>
+                  </div>
+                  <p class="adoption-score">Adoption Score: <span class="text-green-600">64%</span></p>
+                  <p class="module-issue">Non-Performing Module(s): Compared Reading (9.81%), Display (90.19%)</p>
+                  <p class="issue-summary"><strong>Key Issues:</strong> New grade types impacting tagging; display module turned off since June 2025.</p>
+                  <p class="recommended-actions"><strong>Recommended Actions:</strong> Support with new grade tagging challenges; facilitate display reactivation and user training.</p>
+               </div>
+            </div>
+            <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+               <h3 class="text-xl font-bold text-blue-800 mb-3">Key Takeaways & Action Framework</h3>
+               <ul class="list-disc list-inside text-gray-700 space-y-2">
+                  <li><span class="font-semibold text-blue-700">Compared Reading and HMT modules</span> cause the largest adoption drops due to technical and procedural issues.</li>
+                  <li><span class="font-semibold text-blue-700">Display module</span> has the highest impact % but mostly from intentional turn-offs; requires operational re-engagement.</li>
+                  <li><span class="font-semibold text-blue-700">MTC and Suggestion modules</span> impact adoption moderately; focus on onboarding and data completeness.</li>
+                  <li><span class="font-semibold text-blue-700">Production and Heat Plan modules</span> show lower impact but room for increased adoption.</li>
+               </ul>
+            </div>
+         </section>
+         <!-- Summary & Insights as Cards -->
+         <div class="mb-10">
+            <h2 class="section-title">Summary & Insights</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               <div class="card p-6">
+                  <p><span class="font-semibold text-blue-700">Customer growth:</span> 3 new paid customers since last period with 3 new customers onboarded and 0 dropped.</p>
+               </div>
+               <div class="card p-6">
+                  <p><span class="font-semibold text-blue-700">Feature Usage:</span> Most customers with Software ON use Whatsapp (Suggestion Reading), followed by Compared Reading and Only Reading.</p>
+               </div>
+               <div class="card p-6">
+                  <p><span class="font-semibold text-blue-700">ChargeMix activity:</span> Alchemy Precision Cast Pvt Ltd showed significant increase in ChargeMix activities, while some customers still have zero activity.</p>
+               </div>
+               <div class="card p-6">
+                  <p><span class="font-semibold text-blue-700">Softwares turned off:</span> Several customers had software turned off, primarily from suggestion or charge mix features.</p>
+               </div>
+               <div class="card p-6">
+                  <p><span class="font-semibold text-blue-700">Production & Heat Plans:</span> Mixed usage with Crescent Foundry and Vishwakarma Founders leading in plan creations, but some customers show no recent activity.</p>
+               </div>
+               <div class="card p-6">
+                  <p><span class="font-semibold text-blue-700">Report Parsing Issues:</span> Parsing failures in HMT reports are mainly due to receiving PDF files where DOCX is expected, or OCR service unavailability.</p>
+               </div>
+               <div class="card p-6">
+                  <p><span class="font-semibold text-blue-700">Hardware Usage:</span> Majority of Spectro TV and DigiMelt devices are active, but Heat Plan-Tablet shows low usage.</p>
+               </div>
+            </div>
+         </div>
+      </div>
+      <script>
+         document.addEventListener('DOMContentLoaded', () => {
+             // Updated data based on user's input
+             const data = {
+                 customerSummary: {
+                     paidCustomers: { prev: 101, current: 106 },
+                     newCustomers: { prev: 2, current: 3 },
+                     droppedCustomers: { prev: 8, current: 0 }
+                 },
+                 newCustomersDetails: [
+                     { name: "Indoshell Cast Ltd", feature: "Only Reading + AI", cluster: "Tamil Nadu", subCluster: "Chennai" },
+                     { name: "KALYAN STEEL PRODUCTS PRIVATE LIMITED - UNIT 2", feature: "Suggestion Reading", cluster: "Uttar Pradesh", subCluster: "Agra" },
+                     { name: "Rekha Metals Pvt. Ltd.", feature: "Suggestion Reading", cluster: "Maharashtra", subCluster: "Kolhapur" },
+                     { name: "Brahmani Technocast", feature: "Suggestion Reading", cluster: "Gujarat", subCluster: "Rajkot" },
+                     { name: "SHARP CHUCK UNIT - 3", feature: "Suggestion Reading", cluster: "Punjab", subCluster: "Jalandhar" },
+                     { name: "FERRO LINKS", feature: "Suggestion Reading", cluster: "Tamil Nadu", subCluster: "Chennai" }
+                 ],
+                 customerGrouping: {
+                     totalActivePaidCustomers: 109,
+                     chargeMixUsers: 5,
+                     softwareOff: 5,
+                     softwareOn: 99,
+                     whatsappOnlyReading: 5,
+                     whatsappComparedReading: 10,
+                     whatsappSuggestionReading: 84
+                 },
+                 chargeMixActivity: [
+                     { name: "Alchemy Precision Cast Pvt Ltd", prev: 18, current: 37, optimized: 36 },
+                     { name: "CRESCENT FOUNDRY CO PVT.LTD.", prev: 16, current: 13, optimized: 13 },
+                     { name: "Brakes India Foundry Division Shollinganallur", prev: 5, current: 7, optimized: 7 },
+                     { name: "Brakes India Foundry Division Naidupet", prev: 7, current: 2, optimized: 2 },
+                     { name: "Brakes India Pvt Ltd (Flometallic Unit, Jhagadia)", prev: 0, current: 0, optimized: 0 },
+                     { name: "BRAKES INDIA PRIVATE LIMITED UNIT 2", prev: 0, current: 0, optimized: 0 }
+                 ],
+                 softwareTurnedOffCustomers: [
+                     { name: "Paranjape Auto Cast J-14(Cast Iron)", remarks: "Previous Period", feature: "Compared Reading", cluster: "Maharashtra", subCluster: "Satara" },
+                     { name: "CRESCENT FOUNDRY CO PVT.LTD.", remarks: "Previous Period", feature: "Charge Mix", cluster: "West Bengal", subCluster: "Howrah" },
+                     { name: "Airking Industries", remarks: "Previous Period", feature: "Suggestion + HMT + MTC", cluster: "Gujarat", subCluster: "Rajkot" },
+                     { name: "SAN PRECISION ALLOYS PRIVATE LIMITED", remarks: "Previous Period", feature: "Compared Reading", cluster: "Tamil Nadu", subCluster: "Coimbatore" },
+                     { name: "Top-Gear Metals Pvt Ltd", remarks: "Previous Period", feature: "Suggestion", cluster: "Maharashtra", subCluster: "Kolhapur" }
+                 ],
+                 productionPlan: [
+                     { name: "CRESCENT FOUNDRY CO PVT.LTD.(GJ)", prev: 4, current: 4 },
+                     { name: "Sapre Precision Techologies", prev: 5, current: 3 },
+                     { name: "Mal Metalliks Pvt. Ltd.", prev: 1, current: 0 },
+                     { name: "Vishwakarma Founders Pvt Ltd", prev: 1, current: 0 },
+                     { name: "NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)", prev: 0, current: 0 },
+                     { name: "Shree Kedar metals", prev: 0, current: 0 }
+                 ],
+                 heatPlanCreatedCompleted: [
+                    { customerName: 'CRESCENT FOUNDRY CO PVT.LTD.(GJ)', heatPlanCreatedPrevious: 81, heatPlanCompletedPrevious: 53, heatPlanCreatedCurrent: 83, heatPlanCompletedCurrent: 44, lastHeatPlanCompletedDate: "14-July-25", avgHeatPlanPerDay: 9.22, benchmarkAvgHeatPerDay: 40 },
+                    { customerName: 'Mal Metalliks Pvt. Ltd.', heatPlanCreatedPrevious: 73, heatPlanCompletedPrevious: 2, heatPlanCreatedCurrent: 43, heatPlanCompletedCurrent: 55, lastHeatPlanCompletedDate: "16-July-25", avgHeatPlanPerDay: 46.42, benchmarkAvgHeatPerDay: 60 },
+                    { customerName: 'NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)', heatPlanCreatedPrevious: 187, heatPlanCompletedPrevious: 58, heatPlanCreatedCurrent: 38, heatPlanCompletedCurrent: 18, lastHeatPlanCompletedDate: "1-July-25", avgHeatPlanPerDay: 19, benchmarkAvgHeatPerDay: 15 },
+                    { customerName: 'Sapre Precision Techologies', heatPlanCreatedPrevious: 71, heatPlanCompletedPrevious: 16, heatPlanCreatedCurrent: null, heatPlanCompletedCurrent: 53, lastHeatPlanCompletedDate: "15-July-25", avgHeatPlanPerDay: 1.67, benchmarkAvgHeatPerDay: 15 },
+                    { customerName: 'Shree Kedar metals', heatPlanCreatedPrevious: 110, heatPlanCompletedPrevious: 83, heatPlanCreatedCurrent: 88, heatPlanCompletedCurrent: 49, lastHeatPlanCompletedDate: "16-July-25", avgHeatPlanPerDay: 9.78, benchmarkAvgHeatPerDay: 45 },
+                    { customerName: 'Vishwakarma Founders Pvt Ltd', heatPlanCreatedPrevious: 1128, heatPlanCompletedPrevious: 296, heatPlanCreatedCurrent: 973, heatPlanCompletedCurrent: 330, lastHeatPlanCompletedDate: "16-July-25", avgHeatPlanPerDay: 69.5, benchmarkAvgHeatPerDay: 60 }
+                ],
+                 meltingSectionEAFData: [
+                     { name: "LOCO CASTINGS PRIVATE LIMITED", prevHeatSubmitted: 40, currentHeatSubmitted: 49, recoverableLoss: 18254 },
+                     { name: "Titagarh Rail Systems Limited (HED)", prevHeatSubmitted: 132, currentHeatSubmitted: 150, recoverableLoss: 118115 },
+                     { name: "TITAGARH STEEL", prevHeatSubmitted: 120, currentHeatSubmitted: 109, recoverableLoss: 84216 }
+                 ],
+                 hmtSectionReport: [
+                     { company: "Vishwakarma Founders Pvt Ltd", reportType: "Hardness", lastCreatedDate: "2-July-25", prevCount: 232, currentCount: 31, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "Vishwakarma Founders Pvt Ltd", reportType: "Microstructure", lastCreatedDate: "10-July-25", prevCount: 226, currentCount: 62, parsingFailCount: 39, parsingFailPct: 62.9, remark: "According to the logic, only DOCX files should be parsed, PDF is not parsed." },
+                     { company: "Vishwakarma Founders Pvt Ltd", reportType: "Tensile", lastCreatedDate: "10-July-25", prevCount: 21, currentCount: 8, parsingFailCount: 0, parsingFailPct: 0, remark: "According to the logic, only DOCX files should be parsed, PDF is not parsed." },
+                     { company: "MANTRI METALLICS PVT LTD", reportType: "Hardness", lastCreatedDate: "15-July-25", prevCount: 207, currentCount: 222, parsingFailCount: 14, parsingFailPct: 4.91, remark: "The OCR service has been unavailable for some time." },
+                     { company: "MANTRI METALLICS PVT LTD", reportType: "Microstructure", lastCreatedDate: "15-July-25", prevCount: 1111, currentCount: 886, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "MANTRI METALLICS PVT LTD", reportType: "Tensile", lastCreatedDate: "15-July-25", prevCount: 100, currentCount: 87, parsingFailCount: 3, parsingFailPct: 3.45, remark: "The OCR service has been unavailable for some time." },
+                     { company: "Mal Metalliks Pvt. Ltd.", reportType: "Hardness", lastCreatedDate: "4-July-25", prevCount: 42, currentCount: 17, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "Mal Metalliks Pvt. Ltd.", reportType: "Microstructure", lastCreatedDate: "15-July-25", prevCount: 1062, currentCount: 724, parsingFailCount: 11, parsingFailPct: 1.36, remark: "A blank file was generated." },
+                     { company: "Mal Metalliks Pvt. Ltd.", reportType: "Tensile", lastCreatedDate: "12-July-25", prevCount: 31, currentCount: 0, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "CRESCENT FOUNDRY CO PVT.LTD.(GJ)", reportType: "Hardness", lastCreatedDate: "4-June-25", prevCount: 0, currentCount: 0, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "CRESCENT FOUNDRY CO PVT.LTD.(GJ)", reportType: "Microstructure", lastCreatedDate: "14-June-25", prevCount: 0, currentCount: 0, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "CRESCENT FOUNDRY CO PVT.LTD.(GJ)", reportType: "Tensile", lastCreatedDate: "4-June-25", prevCount: 0, currentCount: 0, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)", reportType: "Hardness", lastCreatedDate: "6-Feb-25", prevCount: 0, currentCount: 0, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)", reportType: "Microstructure", lastCreatedDate: "14-July-25", prevCount: 384, currentCount: 339, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)", reportType: "Tensile", lastCreatedDate: "23-Jun-25", prevCount: 1, currentCount: 0, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "Unimech Industries Pvt Ltd", reportType: "Hardness", lastCreatedDate: "8-July-25", prevCount: 0, currentCount: 3, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "Unimech Industries Pvt Ltd", reportType: "Tensile", lastCreatedDate: "15-July-25", prevCount: 57, currentCount: 103, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "Mantri Metallics Pvt Ltd Pantnagar", reportType: "Hardness", lastCreatedDate: "15-July-25", prevCount: 28, currentCount: 89, parsingFailCount: 12, parsingFailPct: 12.5, remark: "The OCR service has been unavailable for some time." },
+                     { company: "Mantri Metallics Pvt Ltd Pantnagar", reportType: "Tensile", lastCreatedDate: "11-July-25", prevCount: 24, currentCount: 23, parsingFailCount: 3, parsingFailPct: 8.57, remark: "The OCR service has been unavailable for some time." },
+                     { company: "KALYAN STEEL PRODUCTS PRIVATE LIMITED", reportType: "Hardness", lastCreatedDate: "24-June-25", prevCount: 2, currentCount: 0, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "KALYAN STEEL PRODUCTS PRIVATE LIMITED", reportType: "Microstructure", lastCreatedDate: "21-June-25", prevCount: 1, currentCount: 0, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "Airking Industries", reportType: "Microstructure", lastCreatedDate: "6-July-25", prevCount: 68, currentCount: 12, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "Sapre Precision Techologies", reportType: "Microstructure", lastCreatedDate: "15-July-25", prevCount: 26, currentCount: 38, parsingFailCount: 0, parsingFailPct: 0, remark: "" },
+                     { company: "GOVIND STEEL", reportType: "Microstructure", lastCreatedDate: "15-July-25", prevCount: 332, currentCount: 648, parsingFailCount: 0, parsingFailPct: 0, remark: "" }
+                 ],
+                 castingReportMTC: [
+                     { name: "Vishwakarma Founders Pvt Ltd", total: 11, pending: 6, completed: 5, prevMTC: 0, currentMTC: 0 },
+                     { name: "Airking Industries", total: 3, pending: 1, completed: 1, prevMTC: 0, currentMTC: 1 },
+                     { name: "NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)", total: 4, pending: 1, completed: 3, prevMTC: 0, currentMTC: 0 },
+                     { name: "Mal Metalliks Pvt. Ltd.", total: 11, pending: 11, completed: 0, prevMTC: 3, currentMTC: 7 },
+                     { name: "CRESCENT FOUNDRY CO PVT.LTD.(GJ)", total: 3, pending: 1, completed: 2, prevMTC: 0, currentMTC: 3 },
+                     { name: "GOVIND Steel", total: 2, pending: 1, completed: 1, prevMTC: 0, currentMTC: 2 },
+                     { name: "Unimech Industries Pvt Ltd", total: 0, pending: 0, completed: 0, prevMTC: 0, currentMTC: 0 },
+                     { name: "KALYAN STEEL PRODUCTS PRIVATE LIMITED", total: 0, pending: 0, completed: 0, prevMTC: 0, currentMTC: 0 },
+                     { name: "Sapre Precision Techologies", total: 0, pending: 0, completed: 0, prevMTC: 0, currentMTC: 0 },
+                     { name: "Luthra", total: 0, pending: 0, completed: 0, prevMTC: 0, currentMTC: 0 },
+                     { name: "Shree Kedar metals", total: 0, pending: 0, completed: 0, prevMTC: 0, currentMTC: 0 }
+                 ],
+                 hardwareStatus: [
+                     { classification: "Spectro TV", onboarded: 47, assigned: 82, on1Day: 40, on5Days: 44 },
+                     { classification: "Spectro-Tablet", onboarded: 11, assigned: 11, on1Day: 2, on5Days: 1 },
+                     { classification: "DigiMelt-IF", onboarded: 6, assigned: 8, on1Day: 5, on5Days: 6 },
+                     { classification: "DigiMelt-EAF", onboarded: 4, assigned: 5, on1Day: 4, on5Days: 3 },
+                     { classification: "Heat Plan-Tablet", onboarded: 1, assigned: 3, on1Day: 1, on5Days: 0 }
+                 ],
+                 customerAdoptionIssues: [
+                     { name: "Paranjape Auto Cast Satara Unit Pvt Ltd", score: "0%", modules: "Compared Reading (94.74%)", issues: "High grade tagging failure (83%); numerous new grades causing tagging challenges; sample tagging at 89%.", actions: "Conduct training on grade tagging; review new grade list and update pop-up dropdowns; increase sample tagging accuracy." },
+                     { name: "KALYAN STEEL PRODUCTS PRIVATE LIMITED", score: "29%", modules: "HMT (69.47%), MTC (28.07%)", issues: "Tensile machine issue prevented HMT usage; new customer, no MTC usage yet.", actions: "Investigate and resolve tensile machine issues; onboard and train on MTC module; schedule follow-up adoption support." },
+                     { name: "Ramkrishna Foundry pvt ltd", score: "34%", modules: "Compared Reading (81.48%), Suggestion (11.11%)", issues: "File structure change after 20 June causing 100% tagging failure; suggestions performed well before 20 June.", actions: "Audit file formats and tagging procedures; support customer with updated file guidelines; enable suggestion feature reactivation." },
+                     { name: "Sapre Precision Techologies", score: "38%", modules: "HMT (59.48%), MTC (36.05%), Suggestion (2.47%)", issues: "Hardness and tensile test files not received; no MTC files created; grading issues causing suggestion generation failures.", actions: "Expedite data upload for missing tests; provide onboarding help for MTC module; assist with grade tagging accuracy and suggestion generation." },
+                     { name: "Crescent Foundry Pvt Ltd (Bagnan Unit)", score: "45%", modules: "Display (100%)", issues: "Display module turned off since 14 July 2025.", actions: "Engage customer on enabling display module; assess usage barriers; provide refresher support and hardware check if needed." },
+                     { name: "Crescent Foundry Pvt Ltd (Kulgachia Unit)", score: "41%", modules: "Display (100%)", issues: "Display module turned off since 28 March 2025.", actions: "Similar action as Bagnan Unit: activate display; raise awareness of benefits; technical support to resolve issues." },
+                     { name: "Shree Kedar", score: "45%", modules: "HMT (61.37%), MTC (24.80%)", issues: "No recent usage in HMT and MTC modules; last tensile sample created in January.", actions: "Perform engagement review; encourage regular test creation and module use; schedule refresher training on HMT/MTC modules." },
+                     { name: "Malnad Alloy Castings Pvt. Ltd.", score: "47%", modules: "Compared Reading (28.42%), Display (65.07%)", issues: "Low tagging (15%); display module turned off since March 2024.", actions: "Support improved tagging workflows; activate and troubleshoot display module; provide ongoing user training and incentives." },
+                     { name: "Rajneesh Cast Alloys", score: "41%", modules: "Display (100%)", issues: "Display module turned off since June 2025.", actions: "Follow-up to reactivate display; identify operational or technical causes; communicate benefits." },
+                     { name: "NIPHA EXPORTS PVT. LTD. SRP (FOUNDRY)", score: "50%", modules: "Production Plan (17.01%), Heat Plan (29.15%), HMT (32.07%), MTC (19.44%)", issues: "No new production plans; limited HMT/MTC usage; microstructure active; some heat plans ongoing.", actions: "Motivate active use of production & heat planning; address barriers to HMT and MTC adoption; schedule adoption review meetings." },
+                     { name: "Ratan Industries", score: "51%", modules: "Compared Reading (14.88%), Suggestion (10.21%), Display (68.09%)", issues: "Low grade tagging; 100% Add/Dil failure; display off since May 2025.", actions: "Review grade tagging quality; resolve Add/Dil failures and system forms; reactivate display module and increase user engagement." },
+                     { name: "Gangadhar Alloys Pvt. Ltd.", score: "53%", modules: "Compared Reading (26.25%), Display (55%)", issues: "Grade tagging issue due to new grades; display device unused last 5 days.", actions: "Address new grade tagging challenges; re-engage users on display usage; provide refresher training and troubleshooting." },
+                     { name: "GOVIND STEEL", score: "61%", modules: "Compared Reading (3.13%), Suggestion (5.78%), MTC (88.87%)", issues: "Low grade not tagging (11%); Mg recovery missing causing grade failure; starting MTC usage.", actions: "Facilitate grade tagging improvements; resolve additive data issues for suggestions; support continued MTC onboarding." },
+                     { name: "Iconic Castings Pvt Ltd", score: "61%", modules: "Compared Reading (8.17%), Display (83.49%)", issues: "Multiple new grades not tagged correctly; display module turned off since June 2025.", actions: "Help update grade dictionary; encourage display module activation; provide user support on common issues." },
+                     { name: "JMT Auto Limited", score: "61%", modules: "Display (84.16%)", issues: "Display module turned off since July 2024.", actions: "Activate display module; offer technical and user training support; highlight module benefits." },
+                     { name: "SHARP CHUCK UNIT - 3", score: "60%", modules: "Compared Reading (78.46%)", issues: "New grades causing 50% grade tagging failure; missing in pop-up dropdown.", actions: "Update grade list and popup options; conduct targeted training on new grade tagging; monitor adoption improvements." },
+                     { name: "KOHINOOR METALLICS", score: "60%", modules: "Compared Reading (19.61%), Display (71.45%)", issues: "Tagging errors due to wrong pattern; display turned off since June 2025.", actions: "Correct grade tagging processes; encourage display module usage; run training session for data input standards." },
+                     { name: "Glow Cast", score: "60%", modules: "Compared Reading (10.57%), Display (81.30%)", issues: "Tagging issues from notation errors (\"-\" instead of \"/\"); display off since June 2025.", actions: "Address tagging format issues; reactivate display module; provide user documentation and support." },
+                     { name: "Shanghvi Founders & Engineers Pvt. Ltd.", score: "64%", modules: "Display (92.30%)", issues: "Display module turned off since March 2025.", actions: "Engage customer to enable display; address operational hurdles; ongoing technical assistance." },
+                     { name: "Yash Metallics Pvt Ltd", score: "64%", modules: "Compared Reading (9.81%), Display (90.19%)", issues: "New grade types impacting tagging; display module turned off since June 2025.", actions: "Support with new grade tagging challenges; facilitate display reactivation and user training." }
+                 ]
+             };
+         
+             // Update Paid Customers section
+             const paidCustomersValue = document.querySelector('.metric-value[data-current]');
+             if (paidCustomersValue) {
+                 paidCustomersValue.dataset.current = data.customerSummary.paidCustomers.current;
+                 paidCustomersValue.dataset.previous = data.customerSummary.paidCustomers.prev;
+                 paidCustomersValue.textContent = data.customerSummary.paidCustomers.current;
+                 if (data.customerSummary.paidCustomers.current > data.customerSummary.paidCustomers.prev) {
+                     paidCustomersValue.classList.add('text-green-600');
+                     paidCustomersValue.classList.remove('text-red-600', 'text-amber-600');
+                 } else if (data.customerSummary.paidCustomers.current < data.customerSummary.paidCustomers.prev) {
+                     paidCustomersValue.classList.add('text-red-600');
+                     paidCustomersValue.classList.remove('text-green-600', 'text-amber-600');
+                 } else {
+                     paidCustomersValue.classList.add('text-amber-600');
+                     paidCustomersValue.classList.remove('text-green-600', 'text-red-600');
+                 }
+             }
+         
+             const newCustomersValue = document.querySelector('.metric-value:nth-child(2)'); // Selects the second metric-value
+             if (newCustomersValue) {
+                 newCustomersValue.innerHTML = `${data.customerSummary.newCustomers.current} <svg class="arrow-icon ${data.customerSummary.newCustomers.current > data.customerSummary.newCustomers.prev ? 'arrow-up' : (data.customerSummary.newCustomers.current < data.customerSummary.newCustomers.prev ? 'arrow-down' : 'arrow-neutral')}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>`;
+             }
+         
+             const droppedCustomersValue = document.querySelector('.metric-value.negative'); // Selects the third metric-value
+             if (droppedCustomersValue) {
+                 droppedCustomersValue.innerHTML = `${data.customerSummary.droppedCustomers.current} <svg class="arrow-icon ${data.customerSummary.droppedCustomers.current > data.customerSummary.droppedCustomers.prev ? 'arrow-up' : (data.customerSummary.droppedCustomers.current < data.customerSummary.droppedCustomers.prev ? 'arrow-down' : 'arrow-neutral')}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 14a1 1 0 01-.707-.293l-4-4a1 1 0 011.414-1.414L10 12.586l3.293-3.293a1 1 0 011.414 1.414l-4 4A1 1 0 0110 14z" clip-rule="evenodd"></path></svg>`;
+             }
+         
+         
+             // Update New Customers Details table
+             const newCustomersTableBody = document.querySelector('.new-customers-details-container .data-table tbody');
+             if (newCustomersTableBody) {
+                 newCustomersTableBody.innerHTML = ''; // Clear existing rows
+                 data.newCustomersDetails.forEach(customer => {
+                     const row = `<tr><td>${customer.name}</td><td>${customer.feature}</td><td>${customer.cluster}</td><td>${customer.subCluster}</td></tr>`;
+                     newCustomersTableBody.insertAdjacentHTML('beforeend', row);
+                 });
+             }
+         
+             // Update Customer Grouping charts
+             // Customer Grouping Chart
+             const customerGroupingCtx = document.getElementById('customerGroupingChart').getContext('2d');
+             if (window.customerGroupingChartInstance) {
+                 window.customerGroupingChartInstance.destroy();
+             }
+             window.customerGroupingChartInstance = new Chart(customerGroupingCtx, {
+                 type: 'pie',
+                 data: {
+                     labels: ['ChargeMix Users', 'Software Off', 'Software On'],
+                     datasets: [{
+                         data: [data.customerGrouping.chargeMixUsers, data.customerGrouping.softwareOff, data.customerGrouping.softwareOn],
+                         backgroundColor: [
+                             '#3b82f6', // blue-500
+                             '#ef4444', // red-500
+                             '#10b981'  // green-500
+                         ],
+                         hoverOffset: 4
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             position: 'bottom',
+                         },
+                         title: {
+                             display: false,
+                         }
+                     }
+                 }
+             });
+                 
+             // Whatsapp Feature Chart
+             const whatsappFeatureCtx = document.getElementById('whatsappFeatureChart').getContext('2d');
+             if (window.whatsappFeatureChartInstance) {
+                 window.whatsappFeatureChartInstance.destroy();
+             }
+             window.whatsappFeatureChartInstance = new Chart(whatsappFeatureCtx, {
+                 type: 'pie',
+                 data: {
+                     labels: ['Whatsapp (Only Reading)', 'Whatsapp (Compared Reading)', 'Whatsapp (Suggestion Reading)'],
+                     datasets: [{
+                         data: [data.customerGrouping.whatsappOnlyReading, data.customerGrouping.whatsappComparedReading, data.customerGrouping.whatsappSuggestionReading],
+                         backgroundColor: [
+                             '#8b5cf6', // purple-500
+                             '#6366f1', // indigo-500
+                             '#ec4899'  // pink-500
+                         ],
+                         hoverOffset: 4
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             position: 'bottom',
+                         },
+                         title: {
+                             display: false,
+                         }
+                     }
+                 }
+             });
+         
+             // Update ChargeMix Activity table
+             const chargeMixTableBody = document.querySelector('section:nth-of-type(2) .min-w-full tbody'); // Section 4
+             if (chargeMixTableBody) {
+                 chargeMixTableBody.innerHTML = '';
+                 data.chargeMixActivity.forEach(item => {
+                     const grade = item.current > item.prev ? 'Good' : (item.current < item.prev ? 'Poor' : 'Neutral');
+                     const gradeColor = item.current > item.prev ? 'text-green-600' : (item.current < item.prev ? 'text-red-600' : 'text-amber-600');
+                     const row = `<tr>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.name}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${grade === 'Neutral' ? 'neutral' : ''}">${item.prev}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.current}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.optimized}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${gradeColor} font-semibold">${grade}</td>
+                     </tr>`;
+                     chargeMixTableBody.insertAdjacentHTML('beforeend', row);
+                 });
+             }
+         
+             // Update ChargeMix Activity Chart
+             const chargeMixActivityCtx = document.getElementById('chargeMixActivityChart').getContext('2d');
+             if (window.chargeMixActivityChartInstance) {
+                 window.chargeMixActivityChartInstance.destroy();
+             }
+             window.chargeMixActivityChartInstance = new Chart(chargeMixActivityCtx, {
+                 type: 'bar',
+                 data: {
+                     labels: data.chargeMixActivity.map(item => item.name),
+                     datasets: [
+                         {
+                             label: 'Previous Period',
+                             data: data.chargeMixActivity.map(item => item.prev),
+                             backgroundColor: '#a78bfa',
+                             borderColor: '#8b5cf6',
+                             borderWidth: 1
+                         },
+                         {
+                             label: 'Current Period',
+                             data: data.chargeMixActivity.map(item => item.current),
+                             backgroundColor: '#3b82f6',
+                             borderColor: '#2563eb',
+                             borderWidth: 1
+                         },
+                         {
+                             label: 'Optimized ChargeMix Count',
+                             data: data.chargeMixActivity.map(item => item.optimized),
+                             backgroundColor: '#10b981',
+                             borderColor: '#059669',
+                             borderWidth: 1
+                         }
+                     ]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             position: 'top',
+                         },
+                         title: {
+                             display: true,
+                             text: 'ChargeMix Activity Overview'
+                         }
+                     },
+                     scales: {
+                         x: {
+                             stacked: false,
+                             title: {
+                                 display: true,
+                                 text: 'Customer Name'
+                             }
+                         },
+                         y: {
+                             stacked: false,
+                             beginAtZero: true,
+                             title: {
+                                 display: true,
+                                 text: 'Count'
+                             }
+                         }
+                     }
+                 }
+             });
+         
+             // Update Software Turned Off Customers table
+             const softwareOffTableBody = document.querySelector('.software-turned-off-customers-container .data-table tbody');
+             if (softwareOffTableBody) {
+                 softwareOffTableBody.innerHTML = '';
+                 data.softwareTurnedOffCustomers.forEach(customer => {
+                     const row = `<tr>
+                         <td class="px-6 py-4 whitespace-nowrap">${customer.name}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${customer.remarks}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${customer.feature}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${customer.cluster}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${customer.subCluster}</td>
+                     </tr>`;
+                     softwareOffTableBody.insertAdjacentHTML('beforeend', row);
+                 });
+             }
+         
+             // Update Production Plan table
+             const productionPlanTableBody = document.querySelector('section:nth-of-type(4) .min-w-full tbody'); // Section 6.1
+             if (productionPlanTableBody) {
+                 productionPlanTableBody.innerHTML = '';
+                 data.productionPlan.forEach(item => {
+                     const grade = item.current > item.prev ? 'Good' : (item.current < item.prev ? 'Poor' : 'Neutral');
+                     const gradeColor = item.current > item.prev ? 'text-green-600' : (item.current < item.prev ? 'text-red-600' : 'text-amber-600');
+                     const row = `<tr>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.name}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${grade === 'Neutral' ? 'neutral' : ''}">${item.prev}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.current}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${gradeColor} font-semibold">${grade}</td>
+                     </tr>`;
+                     productionPlanTableBody.insertAdjacentHTML('beforeend', row);
+                 });
+             }
+         
+             // Update Production Plan Chart
+             const productionPlanCtx = document.getElementById('productionPlanChart').getContext('2d');
+             if (window.productionPlanChartInstance) {
+                 window.productionPlanChartInstance.destroy();
+             }
+             window.productionPlanChartInstance = new Chart(productionPlanCtx, {
+                 type: 'bar',
+                 data: {
+                     labels: data.productionPlan.map(item => item.name),
+                     datasets: [
+                         {
+                             label: 'Previous Plans',
+                             data: data.productionPlan.map(item => item.prev),
+                             backgroundColor: '#a78bfa',
+                             borderColor: '#8b5cf6',
+                             borderWidth: 1
+                         },
+                         {
+                             label: 'Current Plans',
+                             data: data.productionPlan.map(item => item.current),
+                             backgroundColor: '#3b82f6',
+                             borderColor: '#2563eb',
+                             borderWidth: 1
+                         }
+                     ]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             position: 'top',
+                         },
+                         title: {
+                             display: true,
+                             text: 'Production Plan Overview'
+                         }
+                     },
+                     scales: {
+                         x: {
+                             stacked: false,
+                             title: {
+                                 display: true,
+                                 text: 'Customer Name'
+                             }
+                         },
+                         y: {
+                             stacked: false,
+                             beginAtZero: true,
+                             title: {
+                                 display: true,
+                                 text: 'Count'
+                             }
+                         }
+                     }
+                 }
+             });
+         
+             // Update Heat Plan Activity table
+             const heatPlanTableBody = document.getElementById('heat-plan-table-body');
+             if (heatPlanTableBody) {
+                heatPlanTableBody.innerHTML = ''; // Clear existing content
+                data.heatPlanCreatedCompleted.forEach(item => { // Corrected data source
+                    const row = heatPlanTableBody.insertRow();
+                    row.className = "bg-white divide-y divide-gray-200"; // Keep existing classes
+                    let grade = 'Neutral';
+                    let gradeColor = 'text-amber-600';
+                    // Example grading logic (adjust as needed based on your criteria)
+                    if (item.avgHeatPlanPerDay > item.benchmarkAvgHeatPerDay) {
+                        grade = 'Good';
+                        gradeColor = 'text-green-600';
+                    } else if (item.avgHeatPlanPerDay < item.benchmarkAvgHeatPerDay) {
+                        grade = 'Poor';
+                        gradeColor = 'text-red-600';
+                    }
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">${item.customerName}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.heatPlanCreatedPrevious}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.heatPlanCompletedPrevious}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.heatPlanCreatedCurrent !== null ? item.heatPlanCreatedCurrent : '—'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.heatPlanCompletedCurrent}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.lastHeatPlanCompletedDate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.avgHeatPlanPerDay}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.benchmarkAvgHeatPerDay}</td>
+                        <td class="px-6 py-4 whitespace-nowrap ${gradeColor} font-semibold">${grade}</td>
+                    `;
+                });
+             }
+
+            // Heat Plan Chart
+            const heatPlanCtx = document.getElementById('heatPlanChart').getContext('2d');
+            if (window.heatPlanChartInstance) {
+                window.heatPlanChartInstance.destroy();
+            }
+            window.heatPlanChartInstance = new Chart(heatPlanCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.heatPlanCreatedCompleted.map(item => item.customerName),
+                    datasets: [
+                        {
+                            label: 'Heat Plan Created (Current)',
+                            data: data.heatPlanCreatedCompleted.map(item => item.heatPlanCreatedCurrent),
+                            backgroundColor: '#3b82f6',
+                            borderColor: '#2563eb',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Heat Plan Completed (Current)',
+                            data: data.heatPlanCreatedCompleted.map(item => item.heatPlanCompletedCurrent),
+                            backgroundColor: '#10b981',
+                            borderColor: '#059669',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Avg Heat Plan Per Day',
+                            data: data.heatPlanCreatedCompleted.map(item => item.avgHeatPlanPerDay),
+                            backgroundColor: '#f59e0b',
+                            borderColor: '#d97706',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Heat Plan Activity Overview'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Customer Name'
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Count / Average'
+                            }
+                        }
+                    }
+                }
+            });
+         
+             // Update Melting Section EAF Heat Submission table
+             const eafHeatTableBody = document.querySelector('section:nth-of-type(6) .min-w-full tbody'); // Section 7
+             if (eafHeatTableBody) {
+                 eafHeatTableBody.innerHTML = '';
+                 data.meltingSectionEAFData.forEach(item => {
+                     const grade = item.currentHeatSubmitted > item.prevHeatSubmitted ? 'Good' : (item.currentHeatSubmitted < item.prevHeatSubmitted ? 'Poor' : 'Neutral');
+                     const gradeColor = item.currentHeatSubmitted > item.prevHeatSubmitted ? 'text-green-600' : (item.currentHeatSubmitted < item.prevHeatSubmitted ? 'text-red-600' : 'text-amber-600');
+                     const row = `<tr>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.name}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.prevHeatSubmitted}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.currentHeatSubmitted}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.recoverableLoss}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${gradeColor} font-semibold">${grade}</td>
+                     </tr>`;
+                     eafHeatTableBody.insertAdjacentHTML('beforeend', row);
+                 });
+             }
+         
+             // Update Melting Section EAF Heat Submission Chart
+             const eafHeatSubmissionCtx = document.getElementById('eafHeatSubmissionChart').getContext('2d');
+             if (window.eafHeatSubmissionChartInstance) {
+                 window.eafHeatSubmissionChartInstance.destroy();
+             }
+             window.eafHeatSubmissionChartInstance = new Chart(eafHeatSubmissionCtx, {
+                 type: 'bar',
+                 data: {
+                     labels: data.meltingSectionEAFData.map(item => item.name),
+                     datasets: [
+                         {
+                             label: 'Heat Submitted (Prev)',
+                             data: data.meltingSectionEAFData.map(item => item.prevHeatSubmitted),
+                             backgroundColor: '#a78bfa',
+                             borderColor: '#8b5cf6',
+                             borderWidth: 1
+                         },
+                         {
+                             label: 'Heat Submitted (Current)',
+                             data: data.meltingSectionEAFData.map(item => item.currentHeatSubmitted),
+                             backgroundColor: '#3b82f6',
+                             borderColor: '#2563eb',
+                             borderWidth: 1
+                         },
+                         {
+                             label: 'Recoverable Loss',
+                             data: data.meltingSectionEAFData.map(item => item.recoverableLoss),
+                             backgroundColor: '#10b981',
+                             borderColor: '#059669',
+                             borderWidth: 1
+                         }
+                     ]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             position: 'top',
+                         },
+                         title: {
+                             display: true,
+                             text: 'Melting Section EAF Heat Submission Overview'
+                         }
+                     },
+                     scales: {
+                         x: {
+                             stacked: false,
+                             title: {
+                                 display: true,
+                                 text: 'Customer Name'
+                             }
+                         },
+                         y: {
+                             stacked: false,
+                             beginAtZero: true,
+                             title: {
+                                 display: true,
+                                 text: 'Count / Loss'
+                             }
+                         }
+                     }
+                 }
+             });
+         
+             // Update HMT Section Report table
+             const hmtReportTableBody = document.querySelector('section:nth-of-type(7) .min-w-full tbody'); // Section 8
+             if (hmtReportTableBody) {
+                 hmtReportTableBody.innerHTML = '';
+                 data.hmtSectionReport.forEach(item => {
+                     let grade = 'Neutral';
+                     let gradeColor = 'text-amber-600';
+                     if (item.parsingFailPct > 50 || (item.currentCount === 0 && item.prevCount > 0)) {
+                         grade = 'Poor';
+                         gradeColor = 'text-red-600';
+                     } else if (item.parsingFailPct === 0 && item.currentCount > 0) {
+                         grade = 'Good';
+                         gradeColor = 'text-green-600';
+                     }
+         
+                     const parsingFailPctDisplay = item.parsingFailPct === 0 ? '—' : `${item.parsingFailPct}`;
+                     const parsingFailCountDisplay = item.parsingFailCount === 0 ? '—' : item.parsingFailCount;
+         
+                     const row = `<tr>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.company}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.reportType}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.prevCount}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.currentCount}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${item.parsingFailCount > 0 ? 'parsing-fail' : 'neutral'}">${parsingFailCountDisplay}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${item.parsingFailPct > 0 ? 'parsing-fail' : 'neutral'}">${parsingFailPctDisplay}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.lastCreatedDate}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.remark}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${gradeColor} font-semibold">${grade}</td>
+                     </tr>`;
+                     hmtReportTableBody.insertAdjacentHTML('beforeend', row);
+                 });
+             }
+         
+             // Update HMT Section Report Chart
+             const hmtReportCtx = document.getElementById('hmtReportChart').getContext('2d');
+             if (window.hmtReportChartInstance) {
+                 window.hmtReportChartInstance.destroy();
+             }
+             window.hmtReportChartInstance = new Chart(hmtReportCtx, {
+                 type: 'bar',
+                 data: {
+                     labels: data.hmtSectionReport.map(item => `${item.company} (${item.reportType})`),
+                     datasets: [
+                         {
+                             label: 'Previous Count',
+                             data: data.hmtSectionReport.map(item => item.prevCount),
+                             backgroundColor: '#a78bfa',
+                             borderColor: '#8b5cf6',
+                             borderWidth: 1
+                         },
+                         {
+                             label: 'Current Count',
+                             data: data.hmtSectionReport.map(item => item.currentCount),
+                             backgroundColor: '#3b82f6',
+                             borderColor: '#2563eb',
+                             borderWidth: 1
+                         },
+                         {
+                             label: 'Parsing Fail Count',
+                             data: data.hmtSectionReport.map(item => item.parsingFailCount > 0 ? item.parsingFailCount : null), // Use null for no bar if 0
+                             backgroundColor: '#ef4444',
+                             borderColor: '#dc2626',
+                             borderWidth: 1
+                         }
+                     ]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             position: 'top',
+                         },
+                         title: {
+                             display: true,
+                             text: 'HMT Section Report Overview'
+                         }
+                     },
+                     scales: {
+                         x: {
+                             stacked: false,
+                             title: {
+                                 display: true,
+                                 text: 'Company Name (Report Type)'
+                             }
+                         },
+                         y: {
+                             stacked: false,
+                             beginAtZero: true,
+                             title: {
+                                 display: true,
+                                 text: 'Count'
+                             }
+                         }
+                     }
+                 }
+             });
+         
+             // Update Casting Report - MTC table
+             const castingReportTableBody = document.getElementById('casting-report-table-body');
+             if (castingReportTableBody) {
+                 castingReportTableBody.innerHTML = '';
+                 data.castingReportMTC.forEach(item => {
+                     let grade = 'Neutral';
+                     let gradeColor = 'text-amber-600';
+                     if (item.completed > item.pending && item.total > 0) {
+                         grade = 'Good';
+                         gradeColor = 'text-green-600';
+                     } else if (item.completed === 0 && item.total > 0) {
+                         grade = 'Poor';
+                         gradeColor = 'text-red-600';
+                     } else if (item.total === 0) {
+                         grade = 'Neutral'; // No activity
+                         gradeColor = 'text-amber-600';
+                     }
+         
+                     const row = `<tr>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.name}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.total}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.pending}</td>
+                         <td class="px-6 py-4 whitespace-nowrap">${item.completed}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${item.prevMTC === 0 ? 'neutral' : ''}">${item.prevMTC}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${item.currentMTC === 0 ? 'neutral' : ''}">${item.currentMTC}</td>
+                         <td class="px-6 py-4 whitespace-nowrap ${gradeColor} font-semibold">${grade}</td>
+                     </tr>`;
+                     castingReportTableBody.insertAdjacentHTML('beforeend', row);
+                 });
+             }
+         
+             // Update Casting Report - MTC Chart
+             const castingReportCtx = document.getElementById('castingReportChart').getContext('2d');
+             if (window.castingReportChartInstance) {
+                 window.castingReportChartInstance.destroy();
+             }
+             window.castingReportChartInstance = new Chart(castingReportCtx, {
+                 type: 'bar',
+                 data: {
+                     labels: data.castingReportMTC.map(item => item.name),
+                     datasets: [
+                         {
+                             label: 'Total Certificates',
+                             data: data.castingReportMTC.map(item => item.total),
+                             backgroundColor: '#3b82f6',
+                             borderColor: '#2563eb',
+                             borderWidth: 1
+                         },
+                         {
+                             label: 'Pending',
+                             data: data.castingReportMTC.map(item => item.pending),
+                             backgroundColor: '#f59e0b',
+                             borderColor: '#d97706',
+                             borderWidth: 1
+                         },
+                         {
+                             label: 'Completed',
+                             data: data.castingReportMTC.map(item => item.completed),
+                             backgroundColor: '#10b981',
+                             borderColor: '#059669',
+                             borderWidth: 1
+                         }
+                     ]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             position: 'top',
+                         },
+                         title: {
+                             display: true,
+                             text: 'Casting Report - MTC Overview'
+                         }
+                     },
+                     scales: {
+                         x: {
+                             stacked: false,
+                             title: {
+                                 display: true,
+                                 text: 'Customer Name'
+                             }
+                         },
+                         y: {
+                             stacked: false,
+                             beginAtZero: true,
+                             title: {
+                                 display: true,
+                                 text: 'Count'
+                             }
+                         }
+                     }
+                 }
+             });
+         
+             // Update 15 Days Working Hardware Status table
+             const hardwareStatusTableBody = document.querySelector('div:nth-of-type(10) .card .data-table tbody'); // Section 11
+             if (hardwareStatusTableBody) {
+                 hardwareStatusTableBody.innerHTML = '';
+                 data.hardwareStatus.forEach(item => {
+                     const row = `<tr>
+                         <td>${item.classification}</td>
+                         <td>${item.onboarded}</td>
+                         <td>${item.assigned}</td>
+                         <td>${item.on1Day}</td>
+                         <td>${item.on5Days}</td>
+                     </tr>`;
+                     hardwareStatusTableBody.insertAdjacentHTML('beforeend', row);
+                 });
+             }
+         
+         
+             // Update Customer Adoption Issues Report cards (data is the same, just re-rendering to ensure consistency)
+             const adoptionIssuesContainer = document.querySelector('section:nth-of-type(9) .grid'); // Section 12
+             if (adoptionIssuesContainer) {
+                 adoptionIssuesContainer.innerHTML = ''; // Clear existing cards
+                 data.customerAdoptionIssues.forEach(customer => {
+                     let scoreColor = 'text-amber-600'; // Default to amber
+                     if (parseInt(customer.score) <= 30) {
+                         scoreColor = 'text-red-600';
+                     } else if (parseInt(customer.score) >= 60) {
+                         scoreColor = 'text-green-600';
+                     }
+         
+                     const card = `
+                         <div class="adoption-card">
+                             <div class="adoption-card-header">
+                                 <i class="fas fa-exclamation-circle adoption-card-icon"></i>
+                                 <h3 class="adoption-card-title">${customer.name}</h3>
+                             </div>
+                             <p class="adoption-score">Adoption Score: <span class="${scoreColor}">${customer.score}</span></p>
+                             <p class="module-issue">Non-Performing Module(s): ${customer.modules}</p>
+                             <p class="issue-summary"><strong>Key Issues:</strong> ${customer.issues}</p>
+                             <p class="recommended-actions"><strong>Recommended Actions:</strong> ${customer.actions}</p>
+                         </div>
+                     `;
+                     adoptionIssuesContainer.insertAdjacentHTML('beforeend', card);
+                 });
+             }
+         
+             // Update Summary & Insights
+             const summaryInsightsContainer = document.querySelector('div:nth-of-type(12) .grid');
+             if (summaryInsightsContainer) {
+                 summaryInsightsContainer.innerHTML = `
+                     <div class="card p-6">
+                         <p><span class="font-semibold text-blue-700">Customer growth:</span> ${data.customerSummary.newCustomers.current} new paid customers since last period with ${data.customerSummary.newCustomers.current} new customers onboarded and ${data.customerSummary.droppedCustomers.current} dropped.</p>
+                     </div>
+                     <div class="card p-6">
+                         <p><span class="font-semibold text-blue-700">Feature Usage:</span> Most customers with Software ON use Whatsapp (Suggestion Reading), followed by Compared Reading and Only Reading.</p>
+                     </div>
+                     <div class="card p-6">
+                         <p><span class="font-semibold text-blue-700">ChargeMix activity:</span> Alchemy Precision Cast Pvt Ltd showed significant increase in ChargeMix activities, while some customers still have zero activity.</p>
+                     </div>
+                     <div class="card p-6">
+                         <p><span class="font-semibold text-blue-700">Softwares turned off:</span> Several customers had software turned off, primarily from suggestion or charge mix features.</p>
+                     </div>
+                     <div class="card p-6">
+                         <p><span class="font-semibold text-blue-700">Production & Heat Plans:</span> Mixed usage with Crescent Foundry and Vishwakarma Founders leading in plan creations, but some customers show no recent activity.</p>
+                     </div>
+                     <div class="card p-6">
+                         <p><span class="font-semibold text-blue-700">Report Parsing Issues:</span> Parsing failures in HMT reports are mainly due to receiving PDF files where DOCX is expected, or OCR service unavailability.</p>
+                     </div>
+                     <div class="card p-6">
+                         <p><span class="font-semibold text-blue-700">Hardware Usage:</span> Majority of Spectro TV and DigiMelt devices are active, but Heat Plan-Tablet shows low usage.</p>
+                     </div>
+                 `;
+             }
+         
+             // Generic tooltip handling for elements with 'relative-hover' and 'tooltip-content'
+             // This block is kept for other tooltips in the document, but the New Customers Details section is no longer affected by it.
+             document.querySelectorAll('.relative-hover').forEach(element => {
+                 const tooltip = element.querySelector('.tooltip-content');
+                 if (tooltip) {
+                     element.addEventListener('mousemove', (e) => {
+                         // Position tooltip relative to the mouse, but within bounds
+                         const rect = element.getBoundingClientRect();
+                         let x = e.clientX - rect.left; // X position relative to the element
+                         let y = e.clientY - rect.top;  // Y position relative to the element
+         
+                         // Adjust for tooltip width/height to keep it in view
+                         const tooltipWidth = tooltip.offsetWidth;
+                         const tooltipHeight = tooltip.offsetHeight;
+         
+                         // Prevent tooltip from going off right edge
+                         if (x + tooltipWidth / 2 > rect.width) {
+                             x = rect.width - tooltipWidth / 2;
+                         }
+                         // Prevent tooltip from going off left edge
+                         if (x - tooltipWidth / 2 < 0) {
+                             x = tooltipWidth / 2;
+                         }
+         
+                         // Position above the cursor
+                         tooltip.style.left = `${x}px`;
+                         tooltip.style.top = `${y - tooltipHeight - 10}px`; // 10px offset above cursor
+                     });
+                 }
+             });
+         });
+      </script>
+   </body>
+</html>
